@@ -16,6 +16,13 @@ export function PropertyCard({ property }) {
           className="w-full aspect-[16/9] object-cover"
         />
 
+        {/* Available badge */}
+        {property.available === "yes" && (
+          <div className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded-md text-xs font-semibold">
+            Available
+          </div>
+        )}
+
         {/* Favorite button */}
         <Button
           variant="ghost"
