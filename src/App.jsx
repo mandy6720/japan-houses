@@ -1,14 +1,42 @@
 import { PropertyCard } from "@/components/PropertyCard"
 import { properties } from "@/data/properties"
 import { Heart } from "lucide-react"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 function App() {
-  // Group properties by location and sort by price
+  const [sortBy, setSortBy] = useState("price")
+
+  // Group properties by location and sort by selected criteria
   const groupedProperties = useMemo(() => {
     // Parse price string to number for sorting
     const parsePrice = (priceStr) => {
       return parseInt(priceStr.replace(/[$,]/g, ''))
+    }
+
+    // Parse distance/time strings to numbers for comparison
+    const parseDistance = (distStr) => {
+      // Extract the first number from strings like "11 min to supermarket"
+      const match = distStr.match(/(\d+)/)
+      return match ? parseInt(match[1]) : Infinity
+    }
+
+    const parseRestaurantCount = (countStr) => {
+      // Extract number from strings like "~10 within 10-15 min"
+      const match = countStr.match(/~?(\d+)/)
+      return match ? parseInt(match[1]) : 0
+    }
+
+    const parseStationDistance = (stationStr) => {
+      // Extract minutes from strings like "840 ft to Kitayoshida Station (4min)" or "0.2 mi to Kamo Station (7min)"
+      const match = stationStr.match(/\((\d+)min\)/)
+      return match ? parseInt(match[1]) : Infinity
     }
 
     // Group by location
@@ -21,14 +49,27 @@ function App() {
       return acc
     }, {})
 
-    // Sort each location group by price (lowest first)
+    // Sort each location group by selected criteria
     Object.keys(grouped).forEach(location => {
-      grouped[location].sort((a, b) => parsePrice(a.price) - parsePrice(b.price))
+      grouped[location].sort((a, b) => {
+        switch (sortBy) {
+          case "price":
+            return parsePrice(a.price) - parsePrice(b.price)
+          case "groceryDistance":
+            return parseDistance(a.groceryDistance) - parseDistance(b.groceryDistance)
+          case "restaurantCount":
+            return parseRestaurantCount(b.restaurantCount) - parseRestaurantCount(a.restaurantCount) // Higher is better
+          case "stationDistance":
+            return parseStationDistance(a.stationDistance) - parseStationDistance(b.stationDistance)
+          default:
+            return 0
+        }
+      })
     })
 
     // Convert to array and sort locations alphabetically
     return Object.entries(grouped).sort((a, b) => a[0].localeCompare(b[0]))
-  }, [])
+  }, [sortBy])
 
   return (
     <div className="min-h-screen bg-background">
@@ -46,6 +87,28 @@ function App() {
           </div>
         </div>
       </header>
+
+      {/* Filter Bar */}
+      <div className="border-b bg-card">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center gap-3">
+            <label htmlFor="sort-by" className="text-sm font-medium">
+              Sort by:
+            </label>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[200px]" id="sort-by">
+                <SelectValue placeholder="Sort by..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="price">Price (Low to High)</SelectItem>
+                <SelectItem value="groceryDistance">Grocery Distance</SelectItem>
+                <SelectItem value="restaurantCount">Restaurant Count</SelectItem>
+                <SelectItem value="stationDistance">Station Distance</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
 
       {/* Properties by Location */}
       <main className="container mx-auto px-4 py-8 space-y-12">
