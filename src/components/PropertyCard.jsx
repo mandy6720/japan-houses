@@ -13,7 +13,7 @@ export function PropertyCard({ property }) {
         <img
           src={property.image}
           alt={`Property at ${property.location}`}
-          className="w-full h-48 object-cover"
+          className="w-full aspect-[16/9] object-cover"
         />
 
         {/* Favorite button */}
