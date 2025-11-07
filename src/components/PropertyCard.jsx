@@ -1,10 +1,12 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Heart, MapPin, Car, Store, Utensils, Train } from "lucide-react"
+import { Heart, MapPin, Car, Store, Utensils, Train, Star } from "lucide-react"
 import { useState } from "react"
+import { usePropertyRating } from "@/hooks/usePropertyRating"
 
 export function PropertyCard({ property }) {
   const [isFavorited, setIsFavorited] = useState(true)
+  const [rating, setRating] = usePropertyRating(property.id)
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
@@ -42,6 +44,32 @@ export function PropertyCard({ property }) {
             {property.price}
           </CardTitle>
         </div>
+
+        {/* Star Rating */}
+        <div className="flex gap-1 my-2">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              onClick={() => setRating(rating === star ? 0 : star)}
+              className="focus:outline-none focus:ring-2 focus:ring-primary rounded transition-transform hover:scale-110"
+              aria-label={`Rate ${star} stars`}
+            >
+              <Star
+                className={`h-5 w-5 ${
+                  star <= rating
+                    ? 'fill-yellow-400 text-yellow-400'
+                    : 'text-gray-300'
+                }`}
+              />
+            </button>
+          ))}
+          {rating > 0 && (
+            <span className="text-xs text-muted-foreground ml-1 self-center">
+              ({rating}/5)
+            </span>
+          )}
+        </div>
+
         <CardDescription className="flex items-center gap-1 text-sm">
           <MapPin className="h-4 w-4" />
           {property.location}

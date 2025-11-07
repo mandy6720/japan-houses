@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { getAllRatings } from "@/hooks/usePropertyRating"
 
 function App() {
   const [sortBy, setSortBy] = useState("price")
@@ -61,6 +62,12 @@ function App() {
             return parseRestaurantCount(b.restaurantCount) - parseRestaurantCount(a.restaurantCount) // Higher is better
           case "stationDistance":
             return parseStationDistance(a.stationDistance) - parseStationDistance(b.stationDistance)
+          case "rating": {
+            const ratings = getAllRatings()
+            const ratingA = ratings[a.id] || 0
+            const ratingB = ratings[b.id] || 0
+            return ratingB - ratingA // Higher rating first
+          }
           default:
             return 0
         }
@@ -101,6 +108,7 @@ function App() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="price">Price (Low to High)</SelectItem>
+                <SelectItem value="rating">My Rating (High to Low)</SelectItem>
                 <SelectItem value="groceryDistance">Grocery Distance</SelectItem>
                 <SelectItem value="restaurantCount">Restaurant Count</SelectItem>
                 <SelectItem value="stationDistance">Station Distance</SelectItem>
